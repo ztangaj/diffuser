@@ -1,5 +1,15 @@
 import gym
 
+O_MAZE = \
+        "########\\"+\
+        "#OOOOOO#\\"+\
+        "#OOOOOO#\\"+\
+        "#OO##OO#\\"+\
+        "#OO##OO#\\"+\
+        "#OOOOOO#\\"+\
+        "#OOOOOO#\\"+\
+        "########"
+
 ENVIRONMENT_SPECS = (
     {
         'id': 'HopperFullObs-v2',
@@ -16,6 +26,24 @@ ENVIRONMENT_SPECS = (
     {
         'id': 'AntFullObs-v2',
         'entry_point': ('diffuser.environments.ant:AntFullObsEnv'),
+    },
+    {
+        'id': 'maze2d-se2-omaze-v0',
+        'entry_point': ('diffuser.environments.grid_env_se2:GridEnvSE2'),
+        'max_episode_steps': 150, 
+        'kwargs': {
+            'maze_str':O_MAZE,
+            'dataset_path': '/homes/ztangaj/tony/replandiffuser/diffuser/D4RL_SE2/maze2d-se2-omaze-v0.hdf5',
+        }
+    }, 
+    {
+        'id': 'maze2d-se2-omaze-interpolate',
+        'entry_point': ('diffuser.environments.grid_env_se2:GridEnvSE2'),
+        'max_episode_steps': 150, 
+        'kwargs': {
+            'maze_str':O_MAZE,
+            'dataset_path': '/homes/ztangaj/tony/replandiffuser/diffuser/maze2d-se2-omaze-interpolate.hdf5',
+        }
     },
 )
 

@@ -60,20 +60,29 @@ def maze2d_set_terminals(env):
     env = load_environment(env) if type(env) == str else env
     goal = np.array(env._target)
     threshold = 0.5
+    # threshold = 1
+    print(goal)
 
     def _fn(dataset):
         xy = dataset['observations'][:,:2]
+        # goal = dataset['infos/goal'] # ADD
         distances = np.linalg.norm(xy - goal, axis=-1)
+        print(distances)
         at_goal = distances < threshold
-        timeouts = np.zeros_like(dataset['timeouts'])
-
+        # timeouts = np.zeros_like(dataset['timeouts'])
+        timeouts = np.zeros_like(dataset['infos/goal'][:,0])
+        print(timeouts.shape)
         ## timeout at time t iff
         ##      at goal at time t and
         ##      not at goal at time t + 1
         timeouts[:-1] = at_goal[:-1] * ~at_goal[1:]
 
         timeout_steps = np.where(timeouts)[0]
+        print(timeout_steps)
         path_lengths = timeout_steps[1:] - timeout_steps[:-1]
+        print('path_lengths:', path_lengths)
+        print('^&^&dataset lengths:', dataset['observations'].shape)
+        
 
         print(
             f'[ utils/preprocessing ] Segmented {env.name} | {len(path_lengths)} paths | '
@@ -81,6 +90,8 @@ def maze2d_set_terminals(env):
         )
 
         dataset['timeouts'] = timeouts
+        dataset['rewards'] = np.array(dataset['terminals'], dtype=float) #ADD
+        # print('\n\n^&^& oberservations',dataset['observations'][0])
         return dataset
 
     return _fn

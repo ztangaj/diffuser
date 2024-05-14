@@ -71,12 +71,12 @@ base = {
         'n_reference': 50,
         'n_samples': 10,
         'bucket': None,
-        'device': 'cuda',
+        'device': 'cuda:2',
     },
 
     'plan': {
         'batch_size': 1,
-        'device': 'cuda',
+        'device': 'cuda:2',
 
         ## diffusion model
         'horizon': 256,
@@ -127,5 +127,32 @@ maze2d_large_v1 = {
     'plan': {
         'horizon': 384,
         'n_diffusion_steps': 256,
+    },
+}
+
+maze2d_se2_omaze_v0 = {
+    'diffusion': {
+        'horizon': 4,
+        'n_diffusion_steps': 256,
+        'normalizer': 'DebugNormalizer',
+    },
+    'plan': {
+        'horizon': 4,
+        'n_diffusion_steps': 256,
+        'normalizer': 'DebugNormalizer',
+    },
+}
+
+maze2d_se2_omaze_interpolate = {
+    'diffusion': {
+        'horizon': 64,
+        'n_diffusion_steps': 256,
+        'normalizer': 'DebugNormalizer',
+        'renderer': 'utils.Maze2dSERenderer',
+    },
+    'plan': {
+        'horizon': 64,
+        'n_diffusion_steps': 256,
+        'normalizer': 'DebugNormalizer',
     },
 }

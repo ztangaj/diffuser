@@ -273,7 +273,8 @@ class MuJoCoRenderer:
 MAZE_BOUNDS = {
     'maze2d-umaze-v1': (0, 5, 0, 5),
     'maze2d-medium-v1': (0, 8, 0, 8),
-    'maze2d-large-v1': (0, 9, 0, 12)
+    'maze2d-large-v1': (0, 9, 0, 12),
+    'maze2d-se2-omaze-interpolate': (0, 8, 0, 8)
 }
 
 class MazeRenderer:
@@ -349,6 +350,57 @@ class Maze2dRenderer(MazeRenderer):
         if conditions is not None:
             conditions /= scale
         return super().renders(observations, conditions, **kwargs)
+
+class Maze2dSERenderer(MazeRenderer):
+
+    def __init__(self, env, observation_dim=None):
+        self.env_name = env
+        self.env = load_environment(env)
+        self.observation_dim = np.prod(self.env.observation_space.shape)
+        self.action_dim = np.prod(self.env.action_space.shape)
+        self.goal = None
+        self._background = self.env.maze_arr == 10
+        self._remove_margins = False
+        self._extent = (0, 1, 1, 0)
+        self.theta = 0.628
+
+    def renders(self, observations, conditions=None, **kwargs):
+        bounds = MAZE_BOUNDS[self.env_name]
+        bar_length = 0.7
+        THETA_GRID_RES = 0.628 # 0.314
+
+        # observations[:, :2] = observations[:, :2] + .5
+        if len(bounds) == 2:
+            _, scale = bounds
+            observations /= scale
+        elif len(bounds) == 4:
+            _, iscale, _, jscale = bounds
+            observations[:, 0] /= iscale
+            observations[:, 1] /= jscale
+            bar_length /= jscale
+        else:
+            raise RuntimeError(f'Unrecognized bounds for {self.env_name}: {bounds}')
+
+        if conditions is not None:
+            conditions /= scale
+            
+        plt.clf()
+        fig = plt.gcf()
+        fig.set_size_inches(5, 5)
+        plt.imshow(self._background * .5,
+            extent=self._extent, cmap=plt.cm.binary, vmin=0, vmax=1)
+
+        path_length = len(observations)
+        colors = plt.cm.jet(np.linspace(0,1,path_length))
+        plt.plot(observations[:,1], observations[:,0], c='black', zorder=10)
+        plt.scatter(observations[:,1], observations[:,0], c=colors, zorder=20)
+        for i in range(path_length):
+            x, y, theta = observations[i, 0], observations[i, 1], observations[i, 2]*THETA_GRID_RES
+            dx, dy = bar_length * np.cos(theta), bar_length * np.sin(theta)
+            plt.plot([y - dy, y + dy], [x - dx, x + dx], c='blue', zorder=30)
+        plt.axis('off')
+        img = plot2img(fig, remove_margins=self._remove_margins)
+        return img
 
 #-----------------------------------------------------------------------------#
 #---------------------------------- rollouts ---------------------------------#
